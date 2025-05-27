@@ -8,7 +8,8 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 dotenv.config();
-
+const mongoose = require('mongoose');
+const User = require('../model/user.js');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -51,8 +52,12 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     await s3.send(command);
 
-    const imageUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/uploads/${phone}/${fileName}`;
-
+        const imageUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/uploads/${phone}/${fileName}`;
+        await User.findOneAndUpdate(
+      { phone: phone },
+      { $push: { past: { url: imageUrl, tag: tag || fileName } } }, 
+      { new: true, upsert: true } // upsert creates the user if not exists (optional)
+    );
     res.json({ success: true, imageUrl, localPath: localFilePath });
   } catch (err) {
     console.error('Upload error:', err);
