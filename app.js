@@ -13,11 +13,13 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URL)
     .then(()=>console.log("MongoDB connected"))
     .catch((err)=>console.log(err));
+const cors = require('cors');
+app.use(cors());
 
 app.get('/',(req,res)=>{
     res.json("Hello World");
 })
-
+app.use("/upload",require("./routes/Upload.js"));
 
 app.use("/user",require("./routes/user.js"));
 app.listen(3000,()=>{
